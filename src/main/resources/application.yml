@@ -1,0 +1,5 @@
+server:
+  port: 9396
+spring:
+  application:
+    name: iqTax
