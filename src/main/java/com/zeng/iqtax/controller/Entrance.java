@@ -16,7 +16,7 @@ public class Entrance {
 
     @RequestMapping("addJob")
     public Object addJob() throws IOException {
-        return HttpUtil.get("http://192.168.83.107:8080/demoPath/get?a=23", null, null, null);
+        return HttpUtil.get("http://192.168.83.107:8080/demoPath/get?a=23", null, null, null, null, null);
     }
 
     @RequestMapping("get")
@@ -27,7 +27,7 @@ public class Entrance {
         header.put("token", "23");
         Map<String, String> cookies = new HashMap<>();
         cookies.put("name", "zeng");
-        return HttpUtil.get("http://192.168.83.107:8080/demoPath/get", params, header, cookies, null, null);
+        return HttpUtil.get("http://192.168.83.107:8080/demoPath/get", params, header, cookies, "http://192.168.83.107:8080/demoPath/post", "http://192.168.83.107:8080");
     }
 
     @RequestMapping("post")
@@ -42,6 +42,6 @@ public class Entrance {
         body.put("params", params);
         body.put("headers", header);
         body.put("cookies", cookies);
-        return HttpUtil.post("http://192.168.83.107:8080/demoPath/post", null, body, header, cookies, null, null);
+        return HttpUtil.post("http://192.168.83.107:8080/demoPath/post", null, body, header, cookies, "http://192.168.83.107:8080/demoPath/get", "http://192.168.83.107:8080");
     }
 }
