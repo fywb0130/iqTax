@@ -16,7 +16,7 @@ import java.util.Map;
 public class HttpUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
-    public static Object get(String url, Map<String, Object> params, Map<String, String> headers, Map<String, String> cookies) {
+    public static Object get(String url, Map<String, Object> params, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) {
         if (null == url) {
             LOGGER.warn("empty url!");
             throw new RuntimeException("Empty url");
@@ -25,7 +25,7 @@ public class HttpUtil {
         BufferedReader reader = null;
         String respMsg = "";
         try {
-            HttpURLConnection connection = constructUrlConn(url, params, headers, cookies);
+            HttpURLConnection connection = constructUrlConn(url, params, headers, cookies, referer, origin);
             connection.connect();
             if (200 != connection.getResponseCode()) {
                 LOGGER.error("Http get: {} error: {}", url, connection.getHeaderFields());
@@ -38,7 +38,7 @@ public class HttpUtil {
                 respMsg += line;
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Get request %s error, params: %s, headers: %s, cookies: %s", url, params, headers, cookies), e);
+            LOGGER.error(String.format("Get request %s error, params: %s, headers: %s, cookies: %s, referer: %s, origin: %s", url, params, headers, cookies, referer, origin), e);
             throw new RuntimeException("Get request error");
         } finally {
             try {
@@ -53,7 +53,7 @@ public class HttpUtil {
         return respMsg;
     }
 
-    public static Object post(String url, Map<String, Object> params, Object body, Map<String, String> headers, Map<String, String> cookies) {
+    public static Object post(String url, Map<String, Object> params, Object body, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) {
         if (null == url) {
             LOGGER.warn("empty url!");
             throw new RuntimeException("Empty url");
@@ -63,7 +63,7 @@ public class HttpUtil {
         PrintWriter writer = null;
         String respMsg = "";
         try {
-            HttpURLConnection connection = constructUrlConn(url, params, headers, cookies);
+            HttpURLConnection connection = constructUrlConn(url, params, headers, cookies, referer, origin);
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoInput(true);
@@ -78,7 +78,7 @@ public class HttpUtil {
                 respMsg += line;
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Get request %s error, params: %s, headers: %s, cookies: %s", url, params, headers, cookies), e);
+            LOGGER.error(String.format("Get request %s error, params: %s, headers: %s, cookies: %s, referer: %s, origin: %s", url, params, headers, cookies, referer, origin), e);
             throw new RuntimeException("Get request error");
         } finally {
             try {
@@ -96,7 +96,7 @@ public class HttpUtil {
         return respMsg;
     }
 
-    private static HttpURLConnection constructUrlConn(String url, Map<String, Object> params, Map<String, String> headers, Map<String, String> cookies) throws IOException {
+    private static HttpURLConnection constructUrlConn(String url, Map<String, Object> params, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) throws IOException {
         String fullUrl = url;
         if (null != params && !params.isEmpty()) {
             String paramStr = "";
@@ -123,6 +123,12 @@ public class HttpUtil {
                 cookieVal += entry.getKey() + "=" + entry.getValue() + ";";
             }
             connection.setRequestProperty("Cookie", cookieVal.substring(0, cookieVal.length() -1));
+        }
+        if (null != referer && !referer.isEmpty()) {
+            connection.setRequestProperty("referer", referer);
+        }
+        if (null != origin && !origin.isEmpty()) {
+            connection.setRequestProperty("origin", origin);
         }
 
         return (HttpURLConnection) connection;
