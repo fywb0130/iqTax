@@ -1,5 +1,8 @@
 package com.zeng.iqtax.service;
 
+import com.zeng.iqtax.bean.PostRequest;
+import com.zeng.iqtax.bean.Request;
+import com.zeng.iqtax.bean.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +24,26 @@ public class Engine {
         if (now < date.getTime()) {
             return;
         }
+        for (int i = 0; i < times; i++) {
+            doJob();
+        }
+    }
+
+    public void doJob() {
+        Request now, next;
+
+        Response response = now.sendRequest();
+        next = new;
+        next.addCookie(response.getCookies());
+        next.addHeaders(response.getHeaders());
+
+        now = next;
+        response = now.sendRequest();
+
+        next = new;
+        next.addCookie(response.getCookies());
+        next.addHeaders(response.getHeaders());
 
     }
+
 }

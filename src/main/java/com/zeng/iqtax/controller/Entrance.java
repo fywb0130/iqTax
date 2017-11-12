@@ -4,8 +4,11 @@ import com.zeng.iqtax.utils.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +17,15 @@ import java.util.Map;
 public class Entrance {
     private static final Logger LOGGER = LoggerFactory.getLogger(Entrance.class);
 
-    @RequestMapping("addJob")
-    public Object addJob() throws IOException {
-        return HttpUtil.get("http://192.168.83.107:8080/demoPath/get?a=23", null, null, null, null, null);
+    @RequestMapping(value = "addJob", method = RequestMethod.GET)
+    public Object addJob(HttpServletResponse response) throws IOException {
+        Cookie cookie1 = new Cookie("zeng", "chan");
+        Cookie cookie2 = new Cookie("age", "93");
+        response.addCookie(cookie1);
+        response.addCookie(cookie2);
+
+        response.addHeader("h1", "v1");
+        return "OK";
     }
 
     @RequestMapping("get")

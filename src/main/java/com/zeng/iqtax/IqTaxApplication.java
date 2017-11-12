@@ -11,10 +11,10 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
 @SpringBootApplication
-public class IqtaxApplication {
+public class IqTaxApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IqtaxApplication.class, args);
+		SpringApplication.run(IqTaxApplication.class, args);
 	}
 
 	@Bean

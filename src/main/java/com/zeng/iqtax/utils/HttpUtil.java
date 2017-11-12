@@ -1,6 +1,6 @@
 package com.zeng.iqtax.utils;
 
-import com.google.gson.Gson;
+import com.zeng.iqtax.bean.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,32 +11,43 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.Map;
 
 public class HttpUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
-    public static Object get(String url, Map<String, Object> params, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) {
+    public static void main(String[] args) {
+        get("http://localhost:9396/addJob", null, null, null, null, null);
+    }
+
+    public static Response get(String url, Map<String, Object> params, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) {
         if (null == url) {
             LOGGER.warn("empty url!");
             throw new RuntimeException("Empty url");
         }
 
+        Response response = new Response();
         BufferedReader reader = null;
-        String respMsg = "";
         try {
             HttpURLConnection connection = constructUrlConn(url, params, headers, cookies, referer, origin);
             connection.connect();
+            Map<String,List<String>> respHeaders = connection.getHeaderFields();
             if (200 != connection.getResponseCode()) {
-                LOGGER.error("Http get: {} error: {}", url, connection.getHeaderFields());
+                LOGGER.error("Http get: {} error: {}", url, respHeaders);
                 throw new RuntimeException("Http get error");
             }
 
             String line = null;
+            String respMsg = "";
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             while (null != (line = reader.readLine())) {
                 respMsg += line;
             }
+
+            response.setCookies(respHeaders.get("Set-Cookie"));
+            response.setMultiHeaders(respHeaders);
+            response.setResultStr(respMsg);
         } catch (Exception e) {
             LOGGER.error(String.format("Get request %s error, params: %s, headers: %s, cookies: %s, referer: %s, origin: %s", url, params, headers, cookies, referer, origin), e);
             throw new RuntimeException("Get request error");
@@ -50,18 +61,18 @@ public class HttpUtil {
             }
         }
 
-        return respMsg;
+        return response;
     }
 
-    public static Object post(String url, Map<String, Object> params, Object body, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) {
+    public static Response post(String url, Map<String, Object> params, Object body, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) {
         if (null == url) {
             LOGGER.warn("empty url!");
             throw new RuntimeException("Empty url");
         }
 
+        Response response = new Response();
         BufferedReader reader = null;
         PrintWriter writer = null;
-        String respMsg = "";
         try {
             HttpURLConnection connection = constructUrlConn(url, params, headers, cookies, referer, origin);
             connection.setRequestMethod("POST");
@@ -70,13 +81,25 @@ public class HttpUtil {
             connection.setDoOutput(true);
             connection.connect();
             writer = new PrintWriter(connection.getOutputStream());
-            writer.print(new Gson().toJson(body));
+            writer.print(JsonUtil.toNumricJson(body));
             writer.flush();
+
+            Map<String,List<String>> respHeaders = connection.getHeaderFields();
+            if (200 != connection.getResponseCode()) {
+                LOGGER.error("Http post: {} error: {}", url, respHeaders);
+                throw new RuntimeException("Http post error");
+            }
+
             String line = null;
+            String respMsg = "";
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             while (null != (line = reader.readLine())) {
                 respMsg += line;
             }
+
+            response.setCookies(respHeaders.get("Set-Cookie"));
+            response.setMultiHeaders(respHeaders);
+            response.setResultStr(respMsg);
         } catch (Exception e) {
             LOGGER.error(String.format("Get request %s error, params: %s, headers: %s, cookies: %s, referer: %s, origin: %s", url, params, headers, cookies, referer, origin), e);
             throw new RuntimeException("Get request error");
@@ -93,7 +116,7 @@ public class HttpUtil {
             }
         }
 
-        return respMsg;
+        return response;
     }
 
     private static HttpURLConnection constructUrlConn(String url, Map<String, Object> params, Map<String, String> headers, Map<String, String> cookies, String referer, String origin) throws IOException {
